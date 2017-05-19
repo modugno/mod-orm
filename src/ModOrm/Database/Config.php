@@ -7,7 +7,7 @@
 @dbname => Nome do banco
 */
 
-namespace MobOrm\Database;
+namespace ModOrm\Database;
 
 final class Config {
 	CONST HOST   = "cumedigitaldb.cfse35o8ab3q.sa-east-1.rds.amazonaws.com";

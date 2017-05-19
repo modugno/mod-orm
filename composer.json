@@ -3,7 +3,7 @@
     "description": "ORM básico para PHP",
     "type": "package",
     "license": "MIT",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "authors": [
         {
             "name": "Guilherme Modugno",
@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "ModOrm\\ModOrm\\": "src"
+            "ModOrm\\": "src/ModOrm"
         }
     }
 }
