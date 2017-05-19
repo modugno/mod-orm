@@ -7,7 +7,7 @@ use ModOrm\Entity\SqlFactory;
 
 class Entity extends Database {
 
-	public $instance;
+	public static $instance;
 	public static $sql = "SELECT %s FROM %s";
 	public static $select;
 	public static $where;
@@ -21,34 +21,28 @@ class Entity extends Database {
 
 	public function __construct()
 	{
-		(new static)->newInstance();
+		parent::init();
 	}
 
 	// magic methods
 	public static function __callStatic($name, $args) {
-		$class = get_called_class();
+		
 		if (substr($name, 0, 5) == "getBy") {
 			$field = strtolower(substr($name, 5));
 			array_unshift($args, $field);
+			$class = get_called_class();
 			return call_user_func_array([$class, 'get'], $args);
-		} else {
-			return $class->$method(...$args);
 		}
 
 		throw new \Exception(sprintf("The static method %s not found.", $name));
 	}
 
-	public function newInstance()
-	{
-		if (!isset($this->instance)) {
-			$this->instance = new static;
-		}
-
-		$this->setProperties();
-	}
-
 	public static function getInstance() {
-		return (new static)->instance;
+		if (self::$instance == null) {
+			self::$instance = new static;
+			self::setProperties();
+		}
+		return self::$instance;
 	}
 
 	public static function choose() {
@@ -61,7 +55,7 @@ class Entity extends Database {
 		 * filho direto e o active record ele precisa ser setado caso contrario vem nulo
 		 * e o active records por sua vez, pega o valor do seu filho Model
 		*/
-		self::$table = parent::getTableName();
+		self::$table = (new static)->getTableName();
 	}
 
 	public function defaultStatement() {
@@ -84,13 +78,19 @@ class Entity extends Database {
 		return $array;
 	}
 
+	public function table($name)
+	{
+		(new static)->setTableName($name);
+		return self::getInstance();
+	}
+
 	// retorna todos
 	public static function all($fields = null, $alias = null) {
 		$alias  = ($alias != null)  ? $alias  : "";
 		$fields = ($fields != null) ? $fields : "*";
 		$select = "{$fields} {$alias}"; 
 
-		$statement = parent::getConnection()->prepare(sprintf(self::$sql, $select, parent::getTableName()));
+		$statement = (new static)->getConnection()->prepare(sprintf(self::$sql, $select, (new static)->getTableName()));
 		$statement->execute();
 		return $statement->fetchAll(PDO::FETCH_OBJ);
 	}
@@ -112,9 +112,9 @@ class Entity extends Database {
 			self::where($args[0], $args[1]);
 		}
 
-		$sql = SqlFactory::buildStatement(parent::getTableName());
+		$sql = SqlFactory::buildStatement((new static)->getTableName());
 
-		$statement = parent::getConnection()->prepare($sql);
+		$statement = (new static)->getConnection()->prepare($sql);
 		$statement->execute(self::$whereValue);
 
 		self::defaultStatement();
@@ -127,7 +127,7 @@ class Entity extends Database {
 	}	
 
 	public function find($value) {
-		$pk = parent::getPkTable();
+		$pk = (new static)->getPkTable();
 		$resultSet = self::get($pk, $value);
 		return array_shift($resultSet);
 	}
@@ -228,15 +228,9 @@ class Entity extends Database {
 		return self::getInstance();
 	}
 
-	public function teste() {
-		echo SqlFactory::buildStatement();
-		echo '<br>';
-		print_r(self::$whereValue);
-	}
-
 	// query manual
 	public static function query($query) {
-		$statement = parent::getConnection()->prepare($query);
+		$statement = (new static)->getConnection()->prepare($query);
 		$statement->execute();
 		return $statement;
 	}
@@ -256,7 +250,7 @@ class Entity extends Database {
 
 		$sql = "CALL {$procedure}($placeholder)";
 
-		$statement = parent::getConnection()->prepare($sql);
+		$statement = (new static)->getConnection()->prepare($sql);
 		$statement->execute($parameters);
 
 		return $statement->fetchAll(PDO::FETCH_OBJ);
@@ -268,7 +262,7 @@ class Entity extends Database {
 		if(!is_object($obj)) 
 			throw new \Exception(sprintf("'%s' não é um objecto válido.", $obj));
 
- 		$attributes  = array_keys(parent::hydrateFields($obj)); // pega os atributos da classe
+ 		$attributes  = array_keys((new static)->hydrateFields($obj)); // pega os atributos da classe
  		$fields      = implode(', ', $attributes); // pega os campos que serão inseridos
 
  		// pega o placeholder do objeto
@@ -280,10 +274,10 @@ class Entity extends Database {
  		foreach($attributes as $attr) {
  			array_push($arrValues, $obj->$attr);
  		}
- 		$sql = sprintf("INSERT INTO %s (%s) VALUES (%s)", parent::getTableName(), $fields, $placeholder);
- 		$statement = parent::getConnection()->prepare($sql);
+ 		$sql = sprintf("INSERT INTO %s (%s) VALUES (%s)", (new static)->getTableName(), $fields, $placeholder);
+ 		$statement = (new static)->getConnection()->prepare($sql);
  		$statement->execute($arrValues);
- 		return parent::getConnection()->lastInsertId();
+ 		return (new static)->getConnection()->lastInsertId();
  	}
 
  	// atualiza
@@ -308,17 +302,17 @@ class Entity extends Database {
  		// pega o filtro do where 
  		if($where != null) {
  			$filter = key($where);
- 			$statement = parent::getConnection()->prepare("UPDATE " . static::$table . " SET $fields WHERE {$filter} = ?");
+ 			$statement = (new static)->getConnection()->prepare("UPDATE " . static::$table . " SET $fields WHERE {$filter} = ?");
  			array_push($arrValues, $where[$filter]);
  		} else {
- 			$statement = parent::getConnection()->prepare("UPDATE " . static::$table . " SET $fields WHERE id = ?");
+ 			$statement = (new static)->getConnection()->prepare("UPDATE " . static::$table . " SET $fields WHERE id = ?");
  			array_push($arrValues, $obj->id);
  		}
  		$statement->execute($arrValues);
  	}
 
  	public function delete($where, $value) {
- 		$statement = parent::getConnection()->prepare("DELETE FROM " . static::$table . " WHERE {$where} = ?");
+ 		$statement = (new static)->getConnection()->prepare("DELETE FROM " . static::$table . " WHERE {$where} = ?");
  		$statement->execute([$value]);
  	}
 

@@ -32,14 +32,14 @@ class Database {
  	}
 
  	public static function getDatabaseName() {
- 		return self::$dbname;
+ 		return Config::DBNAME;
  	}
 
- 	public static function setDatabaseName() {
- 		self::$dbname = Config::DBNAME;
- 	}
+ 	// public static function setDatabaseName() {
+ 	// 	self::$dbname = Config::DBNAME;
+ 	// }
 
- 	public static function table($name) {
+ 	public static function setTableName($name) {
  		self::$table = $name;
  	}
  	
@@ -65,6 +65,9 @@ class Database {
  	}
 
  	public static function getPkTable() {
+ 		if (empty(static::$table)) {
+ 			throw new \Exception("A Tabela não foi definida");
+ 		}
  		$sql = sprintf("SHOW keys FROM %s WHERE Key_name = %s", static::$table, "'PRIMARY'");
  		$smtp = self::getConnection()->prepare($sql);
  		$smtp->execute();
