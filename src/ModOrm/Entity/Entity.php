@@ -7,7 +7,7 @@ use ModOrm\Entity\SqlFactory;
 
 class Entity extends Database {
 
-	public static $instance;
+	public $instance;
 	public static $sql = "SELECT %s FROM %s";
 	public static $select;
 	public static $where;
@@ -19,6 +19,11 @@ class Entity extends Database {
 	public static $leftjoin;
 	public static $table;
 
+	public function __construct()
+	{
+		(new static)->newInstance();
+	}
+
 	// magic methods
 	public static function __callStatic($name, $args) {
 		$class = get_called_class();
@@ -26,17 +31,24 @@ class Entity extends Database {
 			$field = strtolower(substr($name, 5));
 			array_unshift($args, $field);
 			return call_user_func_array([$class, 'get'], $args);
-		}	
+		} else {
+			return $class->$method(...$args);
+		}
 
 		throw new \Exception(sprintf("The static method %s not found.", $name));
 	}
 
-	public static function getInstance() {
-		if (self::$instance == null) {
-			self::$instance = new Entity();
-			self::setProperties();
+	public function newInstance()
+	{
+		if (!isset($this->instance)) {
+			$this->instance = new static;
 		}
-		return self::$instance;
+
+		$this->setProperties();
+	}
+
+	public static function getInstance() {
+		return (new static)->instance;
 	}
 
 	public static function choose() {
