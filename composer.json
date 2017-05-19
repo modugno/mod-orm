@@ -1,0 +1,22 @@
+{
+    "name": "gmodugno/mod-orm",
+    "description": "ORM básico para PHP",
+    "type": "package",
+    "license": "MIT",
+    "version": "1.0.0",
+    "authors": [
+        {
+            "name": "Guilherme Modugno",
+            "email": "g.modugno@hotmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">5.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "ModOrm\\ModOrm\\": "src"
+        }
+    }
+}
