@@ -10,11 +10,6 @@ class Database {
 	/* db informations */
 	public static $dbname;
 	public static $connect;
-	public static $table = null;
-
-	public function __construct() {
-		self::init();
-	}
 
 	public static function init() {
 		if(!isset(self::$connect)) {
@@ -33,21 +28,6 @@ class Database {
 
  	public static function getDatabaseName() {
  		return Config::DBNAME;
- 	}
-
- 	// public static function setDatabaseName() {
- 	// 	self::$dbname = Config::DBNAME;
- 	// }
-
- 	public static function setTableName($name) {
- 		self::$table = $name;
- 	}
- 	
- 	public function getTableName() {
- 		if (self::$table == null) {
- 			return static::$table;
- 		}
- 		return self::$table;
  	}
 
  	// get all columns names

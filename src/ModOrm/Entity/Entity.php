@@ -25,37 +25,24 @@ class Entity extends Database {
 	}
 
 	// magic methods
-	public static function __callStatic($name, $args) {
+	public static function __callStatic($method, $args) {
 		
-		if (substr($name, 0, 5) == "getBy") {
-			$field = strtolower(substr($name, 5));
+		if (substr($method, 0, 5) == "getBy") {
+
+			$field = strtolower(substr($method, 5));
+
 			array_unshift($args, $field);
 			$class = get_called_class();
 			return call_user_func_array([$class, 'get'], $args);
+
 		}
 
-		throw new \Exception(sprintf("The static method %s not found.", $name));
+		throw new \Exception(sprintf("The static method %s not found.", $method));
 	}
 
 	public static function getInstance() {
-		if (self::$instance == null) {
-			self::$instance = new static;
-			self::setProperties();
-		}
-		return self::$instance;
-	}
-
-	public static function choose() {
-		self::$instance = null;
-	}
-
-	public function setProperties() {
-		/*
-		 * getTableName() pega o valor static $table de seu filho e o retorna, como seu
-		 * filho direto e o active record ele precisa ser setado caso contrario vem nulo
-		 * e o active records por sua vez, pega o valor do seu filho Model
-		*/
-		self::$table = (new static)->getTableName();
+		
+		return self::$instance == null ? new static : self::$instance;
 	}
 
 	public function defaultStatement() {
@@ -78,9 +65,17 @@ class Entity extends Database {
 		return $array;
 	}
 
-	public function table($name)
+	public static function setTableName($name) {
+ 		static::$table = $name;
+ 	}
+ 	
+ 	public function getTableName() {
+ 		return static::$table;
+ 	}
+
+ 	public function table($name)
 	{
-		(new static)->setTableName($name);
+		self::setTableName($name);
 		return self::getInstance();
 	}
 
