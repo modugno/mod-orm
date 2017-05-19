@@ -1,8 +1,8 @@
 <?php
 
-namespace MobOrm\ModOrm;
+namespace MobOrm\Database;
 
-use MobOrm\ModOrm\Config;
+use MobOrm\Database\Config;
 use PDO;
 
 class Database {

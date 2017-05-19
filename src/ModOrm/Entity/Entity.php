@@ -1,9 +1,9 @@
 <?php
-namespace MobOrm\ModOrm;
+namespace MobOrm\Entity;
 
 use PDO;
-use MobOrm\ModOrm\Database;
-use MobOrm\ModOrm\SqlFactory;
+use MobOrm\Database\Database;
+use MobOrm\Entity\SqlFactory;
 
 class Entity extends Database {
 

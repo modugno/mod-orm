@@ -1,8 +1,8 @@
 <?php
 
-namespace MobOrm\ModOrm;
+namespace MobOrm\Entity;
 
-use MobOrm\ModOrm\Database;
+use MobOrm\Database\Database;
 
 class SqlFactory {
 
